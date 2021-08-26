@@ -1,0 +1,7 @@
+C:\Users\alex7\Desktop\SnakeAI\obj\Debug\SnakeAI.csproj.CoreCompileInputs.cache
+C:\Users\alex7\Desktop\SnakeAI\bin\Debug\SnakeAI.exe.config
+C:\Users\alex7\Desktop\SnakeAI\bin\Debug\SnakeAI.exe
+C:\Users\alex7\Desktop\SnakeAI\bin\Debug\SnakeAI.pdb
+C:\Users\alex7\Desktop\SnakeAI\obj\Debug\SnakeAI.exe
+C:\Users\alex7\Desktop\SnakeAI\obj\Debug\SnakeAI.pdb
+C:\Users\alex7\Desktop\SnakeAI\obj\Debug\SnakeAI.csproj.AssemblyReference.cache
