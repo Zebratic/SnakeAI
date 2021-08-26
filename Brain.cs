@@ -100,11 +100,9 @@ namespace SnakeAI
                     if (GetDistance(LeftLoc, applelocation) < GetDistance(new Point(headlocation.X, headlocation.Y), applelocation))
                         Flip = true;
 
-
-                recalc:
                 if (Flip)
                 {
-                    if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Up && !BlockedRight)
+                    if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Up)
                     {
                         foreach (Point bodyPnt in bodylocation)
                         {
@@ -128,7 +126,7 @@ namespace SnakeAI
 
                         return returnValue;
                     }
-                    else if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Down && !BlockedLeft)
+                    if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Down)
                     {
                         foreach (Point bodyPnt in bodylocation)
                         {
@@ -152,7 +150,7 @@ namespace SnakeAI
 
                         return returnValue;
                     }
-                    else if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Left && !BlockedUp)
+                    if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Left)
                     {
                         foreach (Point bodyPnt in bodylocation)
                         {
@@ -176,7 +174,7 @@ namespace SnakeAI
 
                         return returnValue;
                     }
-                    else if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Right && !BlockedDown)
+                    if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Right)
                     {
                         foreach (Point bodyPnt in bodylocation)
                         {
@@ -205,7 +203,6 @@ namespace SnakeAI
                 #endregion
 
                 redo:
-
                 if (BlockedUp && BlockedDown && BlockedLeft && BlockedRight)
                     return Snake.Gameinstance.SnakeDirection;
 

@@ -82,8 +82,8 @@ namespace SnakeAI
                 }
                 moveThread.Abort();
 
-                Console.Clear();
-                Console.WriteLine("Game Over");
+                //Console.Clear();
+                //Console.WriteLine("Game Over");
                 Console.ReadLine();
             }
         }
