@@ -114,13 +114,10 @@ namespace SnakeAI
                             }
                         }
 
-                        if (!BlockedRight && !BlockedLeft)
-                        {
-                            if (GetDistance(RightLoc, applelocation) < GetDistance(LeftLoc, applelocation))
-                                returnValue = Snake.Direction.Right;
-                            else
-                                returnValue = Snake.Direction.Left;
-                        }
+                        if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedRight)
+                            returnValue = Snake.Direction.Right;
+                        else if (!BlockedLeft)
+                            returnValue = Snake.Direction.Left;
                         else
                             returnValue = Snake.Direction.Up;
 
@@ -138,15 +135,12 @@ namespace SnakeAI
                             }
                         }
 
-                        if (!BlockedLeft && !BlockedRight)
-                        {
-                            if (GetDistance(LeftLoc, applelocation) < GetDistance(RightLoc, applelocation))
-                                returnValue = Snake.Direction.Left;
-                            else
-                                returnValue = Snake.Direction.Right;
-                        }
-                        else
+                        if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedLeft)
                             returnValue = Snake.Direction.Left;
+                        else if (!BlockedRight)
+                            returnValue = Snake.Direction.Right;
+                        else
+                            returnValue = Snake.Direction.Down;
 
                         return returnValue;
                     }
@@ -162,13 +156,10 @@ namespace SnakeAI
                             }
                         }
 
-                        if (!BlockedUp && !BlockedDown)
-                        {
-                            if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation))
-                                returnValue = Snake.Direction.Up;
-                            else
-                                returnValue = Snake.Direction.Down;
-                        }
+                        if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedUp)
+                            returnValue = Snake.Direction.Up;
+                        else if (!BlockedDown)
+                            returnValue = Snake.Direction.Down;
                         else
                             returnValue = Snake.Direction.Left;
 
@@ -186,13 +177,10 @@ namespace SnakeAI
                             }
                         }
 
-                        if (!BlockedUp && !BlockedDown)
-                        {
-                            if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation))
-                                returnValue = Snake.Direction.Up;
-                            else
-                                returnValue = Snake.Direction.Down;
-                        }
+                        if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedUp)
+                            returnValue = Snake.Direction.Up;
+                        else if (!BlockedDown)
+                            returnValue = Snake.Direction.Down;
                         else
                             returnValue = Snake.Direction.Right;
 
@@ -265,6 +253,28 @@ namespace SnakeAI
                     }
                 }
 
+                // fail safe check
+                if (returnValue == Snake.Direction.Up && IsBody(UpLoc))
+                {
+                    BlockedUp = true;
+                    goto redo;
+                }
+                else if (returnValue == Snake.Direction.Down && IsBody(DownLoc))
+                {
+                    BlockedDown = true;
+                    goto redo;
+                }
+                else if (returnValue == Snake.Direction.Left && IsBody(LeftLoc))
+                {
+                    BlockedLeft = true;
+                    goto redo;
+                }
+                else if (returnValue == Snake.Direction.Right && IsBody(RightLoc))
+                {
+                    BlockedRight = true;
+                    goto redo;
+                }
+
                 return returnValue;
             }
 
@@ -279,6 +289,26 @@ namespace SnakeAI
                     return true;
                 else
                     return false;
+            }
+
+            public static bool IsBody(Point pnt)
+            {
+                try
+                {
+                    foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
+                    {
+                        if (bodyPnt == pnt)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+                
+                return false;
             }
         }
     }

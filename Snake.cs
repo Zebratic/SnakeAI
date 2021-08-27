@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,7 @@ namespace SnakeAI
         public bool GameRunning = true;
         public bool KeyReset = true;
         public bool AIEnabled = true;
+        public int SnakeSpeed = 50;
         public SnakeAI.Brain AIBrain { get; set; }
         public int ScreenWidth { get; set; }
         public int ScreenHeight { get; set; }
@@ -78,7 +80,7 @@ namespace SnakeAI
                 while (GameRunning)
                 {
                     RenderFrame();
-                    Thread.Sleep(50);
+                    Thread.Sleep(Snake.Gameinstance.SnakeSpeed);
                 }
                 moveThread.Abort();
 
@@ -101,6 +103,18 @@ namespace SnakeAI
         {
             while (true)
             {
+                if (Console.KeyAvailable && KeyReset && AIEnabled)
+                {
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+                    KeyReset = false;
+                    if (key.Key == ConsoleKey.UpArrow)
+                        Snake.Gameinstance.SnakeSpeed += 10;
+                    else if (key.Key == ConsoleKey.DownArrow)
+                        Snake.Gameinstance.SnakeSpeed -= 10;
+
+                    Debug.WriteLine(Snake.Gameinstance.SnakeSpeed);
+                }
+
                 if (Console.KeyAvailable && KeyReset && !AIEnabled)
                 {
                     ConsoleKeyInfo key = Console.ReadKey(true);
@@ -149,13 +163,20 @@ namespace SnakeAI
             if (DrawPoints.Count > SnakeLength)
                 DrawPoints.RemoveAt(0);
 
-            DrawString(AppleLocation, "o", ConsoleColor.Green);
+            DrawString(AppleLocation, "X", ConsoleColor.Green);
+
+            // draw body
+            foreach (Point pnt in DrawPoints)
+                DrawString(pnt, SnakeBody);
+
+            DrawString(SnakeLocationHead, SnakeBody, ConsoleColor.Red);
 
             // check collision
             foreach (Point pnt in DrawPoints)
             {
                 if (SnakeLocationHead == pnt && pnt != DrawPoints[0])
                 {
+                    Debug.WriteLine(SnakeDirection.ToString());
                     GameRunning = false;
                     return;
                 }
@@ -172,12 +193,6 @@ namespace SnakeAI
                 return;
             }
 
-            // draw body
-            foreach (Point pnt in DrawPoints)
-                DrawString(pnt, SnakeBody);
-
-            DrawString(SnakeLocationHead, SnakeBody, ConsoleColor.Red);
-            
             DrawPoints.Add(SnakeLocationHead);
 
             KeyReset = true;
