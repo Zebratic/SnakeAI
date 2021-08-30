@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static SnakeAI.SnakeAI;
 
 namespace SnakeAI
 {
@@ -23,9 +24,9 @@ namespace SnakeAI
         public Random rnd = new Random();
         public bool GameRunning = true;
         public bool KeyReset = true;
-        public bool AIEnabled = true;
-        public int SnakeSpeed = 50;
-        public SnakeAI.Brain AIBrain { get; set; }
+        public bool AIEnabled { get; set; }
+        public int SnakeSpeed { get; set; }
+        public Brain AIBrain { get; set; }
         public int ScreenWidth { get; set; }
         public int ScreenHeight { get; set; }
         public string SnakeBody = "█";
@@ -34,7 +35,7 @@ namespace SnakeAI
         public Direction SnakeDirection { get; set; }
         public List<Point> DrawPoints = new List<Point>();
         public Point AppleLocation { get; set; }
-        public Point GetRandomPoint() => new Point(rnd.Next(0, ScreenWidth), rnd.Next(0, ScreenHeight));
+        public Point GetRandomPoint() => new Point(rnd.Next(1, ScreenWidth + 2), rnd.Next(1, ScreenHeight));
         public Direction GetRandomDirection()
         {
             int i = rnd.Next(0, 4);
@@ -55,8 +56,11 @@ namespace SnakeAI
         static void Main(string[] args)
         {
             Gameinstance = new Snake();
-            Gameinstance.AIBrain = new SnakeAI.Brain(SnakeAI.IQ.Pro);
+            Gameinstance.AIBrain = new SnakeAI.Brain(SnakeAI.IQ.Direct);
             Gameinstance.AIEnabled = true;
+            Gameinstance.ScreenWidth = 32;
+            Gameinstance.ScreenHeight = 16;
+            Gameinstance.SnakeSpeed = 50;
             Gameinstance.StartGame();
         }
 
@@ -64,23 +68,22 @@ namespace SnakeAI
         {
             while (true)
             {
-                Console.WindowHeight = 16;
-                Console.WindowWidth = 32;
                 Console.CursorVisible = false;
-                ScreenWidth = Console.WindowWidth;
-                ScreenHeight = Console.WindowHeight;
-                Console.SetBufferSize(ScreenWidth +1, ScreenHeight +1);
+                Console.WindowWidth = Gameinstance.ScreenWidth + 3;
+                Console.WindowHeight = Gameinstance.ScreenHeight + 1;
+                //Console.SetBufferSize(Gameinstance.ScreenWidth, Gameinstance.ScreenHeight);
                 SnakeLocationHead = GetRandomPoint();
                 SnakeDirection = GetRandomDirection();
-                SnakeLength = 2;
+                SnakeLength = 3;
                 SpawnApple();
 
                 Thread moveThread = new Thread(RegisterMove);
                 moveThread.Start();
                 while (GameRunning)
                 {
+                    DrawBorder();
                     RenderFrame();
-                    Thread.Sleep(Snake.Gameinstance.SnakeSpeed);
+                    Thread.Sleep(Gameinstance.SnakeSpeed);
                 }
                 moveThread.Abort();
 
@@ -108,11 +111,11 @@ namespace SnakeAI
                     ConsoleKeyInfo key = Console.ReadKey(true);
                     KeyReset = false;
                     if (key.Key == ConsoleKey.UpArrow)
-                        Snake.Gameinstance.SnakeSpeed += 10;
-                    else if (key.Key == ConsoleKey.DownArrow)
-                        Snake.Gameinstance.SnakeSpeed -= 10;
+                        Gameinstance.SnakeSpeed += 10;
+                    else if (key.Key == ConsoleKey.DownArrow && Gameinstance.SnakeSpeed != 0)
+                        Gameinstance.SnakeSpeed -= 10;
 
-                    Debug.WriteLine(Snake.Gameinstance.SnakeSpeed);
+                    Debug.WriteLine(Gameinstance.SnakeSpeed);
                 }
 
                 if (Console.KeyAvailable && KeyReset && !AIEnabled)
@@ -130,7 +133,7 @@ namespace SnakeAI
                 }
                 else if (KeyReset && AIEnabled)
                 {
-                    SnakeDirection = SnakeAI.Pathfinding.GetNextMove(AIBrain, SnakeLocationHead, DrawPoints, AppleLocation);
+                    SnakeDirection = Pathfinding.GetNextMove(AIBrain, SnakeLocationHead, DrawPoints, AppleLocation);
                 }
             }
         }
@@ -148,8 +151,8 @@ namespace SnakeAI
 
         public void RenderFrame()
         {
-            Console.Clear();
-
+            //Console.Clear();
+            
             // move
             if (SnakeDirection == Direction.Up)
                 SnakeLocationHead = new Point(SnakeLocationHead.X, SnakeLocationHead.Y - 1);
@@ -163,13 +166,27 @@ namespace SnakeAI
             if (DrawPoints.Count > SnakeLength)
                 DrawPoints.RemoveAt(0);
 
+
+            if (IsWall(SnakeLocationHead) || IsBody(SnakeLocationHead))
+            {
+                GameRunning = false;
+                return;
+            }
+
             DrawString(AppleLocation, "X", ConsoleColor.Green);
 
             // draw body
             foreach (Point pnt in DrawPoints)
                 DrawString(pnt, SnakeBody);
 
-            DrawString(SnakeLocationHead, SnakeBody, ConsoleColor.Red);
+            if (SnakeDirection == Direction.Up)
+                DrawString(SnakeLocationHead, "^", ConsoleColor.Red);
+            else if (SnakeDirection == Direction.Down)
+                DrawString(SnakeLocationHead, "v", ConsoleColor.Red);
+            else if (SnakeDirection == Direction.Left)
+                DrawString(SnakeLocationHead, "<", ConsoleColor.Red);
+            else if (SnakeDirection == Direction.Right)
+                DrawString(SnakeLocationHead, ">", ConsoleColor.Red);
 
             // check collision
             foreach (Point pnt in DrawPoints)
@@ -187,15 +204,82 @@ namespace SnakeAI
                 }
             }
 
-            if (SnakeLocationHead.X >= ScreenWidth || SnakeLocationHead.Y >= ScreenHeight || SnakeLocationHead.X < 0 || SnakeLocationHead.Y < 0)
-            {
-                GameRunning = false;
-                return;
-            }
-
             DrawPoints.Add(SnakeLocationHead);
 
             KeyReset = true;
+        }
+
+        public static bool IsBody(Point pnt)
+        {
+            try
+            {
+                foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
+                {
+                    if (bodyPnt == pnt)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return false;
+        }
+
+        public void DrawBorder()
+        {
+            #region TOP
+            DrawString(new Point(0, 0), "§", ConsoleColor.Cyan);
+
+            for (int x = 1; x < Snake.Gameinstance.ScreenWidth + 2; x++)
+                DrawString(new Point(x, 0), "-", ConsoleColor.Cyan);
+
+            DrawString(new Point(Snake.Gameinstance.ScreenWidth + 2, 0), "§", ConsoleColor.Cyan);
+            #endregion
+
+            #region MID
+            for (int y = 1; y < Gameinstance.ScreenHeight + 1; y++)
+            {
+                string line = "|";
+                for (int i = 0; i < Gameinstance.ScreenWidth + 1; i++)
+                    line += " ";
+                line += "|";
+
+                DrawString(new Point(0, y), line, ConsoleColor.Cyan);
+            }
+            #endregion
+
+            #region BOTTOM
+            DrawString(new Point(0, Snake.Gameinstance.ScreenHeight), "§", ConsoleColor.Cyan);
+
+            for (int x = 1; x < Snake.Gameinstance.ScreenWidth + 2; x++)
+                DrawString(new Point(x, Snake.Gameinstance.ScreenHeight), "-", ConsoleColor.Cyan);
+
+            DrawString(new Point(Snake.Gameinstance.ScreenWidth + 2, Snake.Gameinstance.ScreenHeight), "§", ConsoleColor.Cyan);
+            #endregion
+
+            /*              §--------------------§
+             *              |                    |
+             *              |                    |
+             *              |                    |
+             *              |                    |
+             *              |                    |
+             *              |                    |
+             *              |                    |
+             *              |                    |
+             *              §--------------------§
+             */
+        }
+
+        public static bool IsWall(Point pnt)
+        {
+            if (pnt.X > Gameinstance.ScreenWidth + 1 || pnt.X < 1 || pnt.Y > Gameinstance.ScreenHeight - 1 || pnt.Y < 1)
+                return true;
+            else
+                return false;
         }
     }
 }

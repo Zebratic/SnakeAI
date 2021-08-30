@@ -26,10 +26,8 @@ namespace SnakeAI
 
         public enum IQ
         {
-            Pro,
+            Direct,
             Smart,
-            Average,
-            Dumb,
             Braindead
         }
 
@@ -40,14 +38,10 @@ namespace SnakeAI
                 Snake.Direction returnValue = Snake.Gameinstance.SnakeDirection;
                 switch (brain.IQ)
                 {
-                    case IQ.Pro:
-                        returnValue = CalculateNextMove(headlocation, bodylocation, applelocation);
+                    case IQ.Direct:
+                        returnValue = CalculateNextDirectMove(headlocation, bodylocation, applelocation);
                         break;
                     case IQ.Smart:
-                        break;
-                    case IQ.Average:
-                        break;
-                    case IQ.Dumb:
                         break;
                     case IQ.Braindead:
                         break;
@@ -58,221 +52,233 @@ namespace SnakeAI
                 return returnValue;
             }
 
-            public static Snake.Direction CalculateNextMove(Point headlocation, List<Point> bodylocation, Point applelocation)
+            public static Snake.Direction CalculateNextDirectMove(Point headlocation, List<Point> bodylocation, Point applelocation)
             {
+                fix:
                 Snake.Direction returnValue = Snake.Gameinstance.SnakeDirection;
-
-                Point UpLoc = new Point(headlocation.X, headlocation.Y - 1);
-                Point DownLoc = new Point(headlocation.X, headlocation.Y + 1);
-                Point LeftLoc = new Point(headlocation.X - 1, headlocation.Y);
-                Point RightLoc = new Point(headlocation.X + 1, headlocation.Y);
-
-                bool BlockedUp = false;
-                bool BlockedDown = false;
-                bool BlockedLeft = false;
-                bool BlockedRight = false;
-
-                if (IsWall(UpLoc))
-                    BlockedUp = true;
-                if (IsWall(DownLoc))
-                    BlockedDown = true;
-                if (IsWall(LeftLoc))
-                    BlockedLeft = true;
-                if (IsWall(RightLoc))
-                    BlockedRight = true;
-
-                // half broken
-                #region Check if apple is behind snake head direction
-                bool Flip = false;
-                if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Up)
-                    if (GetDistance(DownLoc, applelocation) < GetDistance(new Point(headlocation.X, headlocation.Y), applelocation))
-                        Flip = true;
-
-                if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Down)
-                    if (GetDistance(UpLoc, applelocation) < GetDistance(new Point(headlocation.X, headlocation.Y), applelocation))
-                        Flip = true;
-
-                if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Left)
-                    if (GetDistance(RightLoc, applelocation) < GetDistance(new Point(headlocation.X, headlocation.Y), applelocation))
-                        Flip = true;
-
-                if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Right)
-                    if (GetDistance(LeftLoc, applelocation) < GetDistance(new Point(headlocation.X, headlocation.Y), applelocation))
-                        Flip = true;
-
-                if (Flip)
+                try
                 {
+                    Point UpLoc = new Point(headlocation.X, headlocation.Y - 1);
+                    Point DownLoc = new Point(headlocation.X, headlocation.Y + 1);
+                    Point LeftLoc = new Point(headlocation.X - 1, headlocation.Y);
+                    Point RightLoc = new Point(headlocation.X + 1, headlocation.Y);
+
+                    bool BlockedUp = false;
+                    bool BlockedDown = false;
+                    bool BlockedLeft = false;
+                    bool BlockedRight = false;
+
+                    if (Snake.IsWall(UpLoc) || Snake.IsBody(UpLoc))
+                        BlockedUp = true;
+                    if (Snake.IsWall(DownLoc) || Snake.IsBody(DownLoc))
+                        BlockedDown = true;
+                    if (Snake.IsWall(LeftLoc) || Snake.IsBody(LeftLoc))
+                        BlockedLeft = true;
+                    if (Snake.IsWall(RightLoc) || Snake.IsBody(RightLoc))
+                        BlockedRight = true;
+
+                    // half broken
+                    #region Check if apple is behind snake head direction
+                    bool Flip = false;
                     if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Up)
-                    {
-                        foreach (Point bodyPnt in bodylocation)
-                        {
-                            if (bodyPnt == RightLoc)
-                            {
-                                BlockedRight = true;
-                                if (bodyPnt == LeftLoc)
-                                    BlockedLeft = true;
-                            }
-                        }
+                        if (GetDistance(DownLoc, applelocation) < GetDistance(headlocation, applelocation))
+                            Flip = true;
 
-                        if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedRight)
-                            returnValue = Snake.Direction.Right;
-                        else if (!BlockedLeft)
-                            returnValue = Snake.Direction.Left;
-                        else
-                            returnValue = Snake.Direction.Up;
-
-                        return returnValue;
-                    }
                     if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Down)
-                    {
-                        foreach (Point bodyPnt in bodylocation)
-                        {
-                            if (bodyPnt == LeftLoc)
-                            {
-                                BlockedLeft = true;
-                                if (bodyPnt == RightLoc)
-                                    BlockedRight = true;
-                            }
-                        }
+                        if (GetDistance(UpLoc, applelocation) < GetDistance(headlocation, applelocation))
+                            Flip = true;
 
-                        if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedLeft)
-                            returnValue = Snake.Direction.Left;
-                        else if (!BlockedRight)
-                            returnValue = Snake.Direction.Right;
-                        else
-                            returnValue = Snake.Direction.Down;
-
-                        return returnValue;
-                    }
                     if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Left)
+                        if (GetDistance(RightLoc, applelocation) < GetDistance(headlocation, applelocation))
+                            Flip = true;
+
+                    if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Right)
+                        if (GetDistance(LeftLoc, applelocation) < GetDistance(headlocation, applelocation))
+                            Flip = true;
+
+                    if (Flip)
                     {
+                        Debug.WriteLine("FLIP");
+                        if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Up)
+                        {
+                            foreach (Point bodyPnt in bodylocation)
+                            {
+                                if (bodyPnt == RightLoc)
+                                {
+                                    BlockedRight = true;
+                                    if (bodyPnt == LeftLoc)
+                                        BlockedLeft = true;
+                                }
+                            }
+
+                            if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedRight)
+                                returnValue = Snake.Direction.Right;
+                            else if (!BlockedUp)
+                                returnValue = Snake.Direction.Up;
+                            else
+                                returnValue = Snake.Direction.Left;
+
+                            return returnValue;
+                        }
+                        if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Down)
+                        {
+                            foreach (Point bodyPnt in bodylocation)
+                            {
+                                if (bodyPnt == LeftLoc)
+                                {
+                                    BlockedLeft = true;
+                                    if (bodyPnt == RightLoc)
+                                        BlockedRight = true;
+                                }
+                            }
+
+                            if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedLeft)
+                                returnValue = Snake.Direction.Left;
+                            else if (!BlockedDown)
+                                returnValue = Snake.Direction.Down;
+                            else
+                                returnValue = Snake.Direction.Right;
+
+                            return returnValue;
+                        }
+                        if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Left)
+                        {
+                            foreach (Point bodyPnt in bodylocation)
+                            {
+                                if (bodyPnt == UpLoc)
+                                {
+                                    BlockedUp = true;
+                                    if (bodyPnt == DownLoc)
+                                        BlockedDown = true;
+                                }
+                            }
+
+                            if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedUp)
+                                returnValue = Snake.Direction.Up;
+                            else if (!BlockedLeft)
+                                returnValue = Snake.Direction.Left;
+                            else
+                                returnValue = Snake.Direction.Down;
+
+                            return returnValue;
+                        }
+                        if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Right)
+                        {
+                            foreach (Point bodyPnt in bodylocation)
+                            {
+                                if (bodyPnt == DownLoc)
+                                {
+                                    BlockedDown = true;
+                                    if (bodyPnt == UpLoc)
+                                        BlockedUp = true;
+                                }
+                            }
+
+                            if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedUp)
+                                returnValue = Snake.Direction.Up;
+                            else if (!BlockedRight)
+                                returnValue = Snake.Direction.Right;
+                            else
+                                returnValue = Snake.Direction.Down;
+
+                            return returnValue;
+                        }
+                    }
+
+                    #endregion
+
+                    double TempDistance = GetDistance(headlocation, applelocation);
+
+                    redo:
+                    TempDistance = 1000000;
+                    Point newPnt;
+
+                    if (BlockedUp && BlockedDown && BlockedLeft && BlockedRight)
+                        return Snake.Gameinstance.SnakeDirection;
+
+                    if (GetDistance(UpLoc, applelocation) < TempDistance && Snake.Gameinstance.SnakeDirection != Snake.Direction.Down && !BlockedUp)
+                    {
+                        newPnt = new Point(headlocation.X, headlocation.Y - 1);
+                        TempDistance = GetDistance(newPnt, applelocation);
+                        returnValue = Snake.Direction.Up;
                         foreach (Point bodyPnt in bodylocation)
                         {
-                            if (bodyPnt == UpLoc)
+                            if (bodyPnt == newPnt)
                             {
                                 BlockedUp = true;
-                                if (bodyPnt == DownLoc)
-                                    BlockedDown = true;
+                                goto redo;
                             }
                         }
-
-                        if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedUp)
-                            returnValue = Snake.Direction.Up;
-                        else if (!BlockedDown)
-                            returnValue = Snake.Direction.Down;
-                        else
-                            returnValue = Snake.Direction.Left;
-
-                        return returnValue;
                     }
-                    if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Right)
+                    if (GetDistance(DownLoc, applelocation) < TempDistance && Snake.Gameinstance.SnakeDirection != Snake.Direction.Up && !BlockedDown)
                     {
+                        newPnt = new Point(headlocation.X, headlocation.Y + 1);
+                        TempDistance = GetDistance(newPnt, applelocation);
+                        returnValue = Snake.Direction.Down;
                         foreach (Point bodyPnt in bodylocation)
                         {
-                            if (bodyPnt == DownLoc)
+                            if (bodyPnt == newPnt)
                             {
                                 BlockedDown = true;
-                                if (bodyPnt == UpLoc)
-                                    BlockedUp = true;
+                                goto redo;
                             }
                         }
-
-                        if (GetDistance(UpLoc, applelocation) < GetDistance(DownLoc, applelocation) && !BlockedUp)
-                            returnValue = Snake.Direction.Up;
-                        else if (!BlockedDown)
-                            returnValue = Snake.Direction.Down;
-                        else
-                            returnValue = Snake.Direction.Right;
-
-                        return returnValue;
                     }
-                }
-
-                #endregion
-
-                redo:
-                if (BlockedUp && BlockedDown && BlockedLeft && BlockedRight)
-                    return Snake.Gameinstance.SnakeDirection;
-
-                Point newPnt;
-                double TempDistance = GetDistance(headlocation, applelocation);
-                if (GetDistance(new Point(headlocation.X, headlocation.Y - 1), applelocation) < TempDistance && Snake.Gameinstance.SnakeDirection != Snake.Direction.Down && !BlockedUp)
-                {
-                    newPnt = new Point(headlocation.X, headlocation.Y - 1);
-                    TempDistance = GetDistance(newPnt, applelocation);
-                    returnValue = Snake.Direction.Up;
-                    foreach (Point bodyPnt in bodylocation)
+                    if (GetDistance(LeftLoc, applelocation) < TempDistance && Snake.Gameinstance.SnakeDirection != Snake.Direction.Right && !BlockedLeft)
                     {
-                        if (bodyPnt == newPnt)
+                        newPnt = new Point(headlocation.X - 1, headlocation.Y);
+                        TempDistance = GetDistance(newPnt, applelocation);
+                        returnValue = Snake.Direction.Left;
+                        foreach (Point bodyPnt in bodylocation)
                         {
-                            BlockedUp = true;
-                            goto redo;
+                            if (bodyPnt == newPnt)
+                            {
+                                BlockedLeft = true;
+                                goto redo;
+                            }
                         }
                     }
-                }
-                if (GetDistance(new Point(headlocation.X, headlocation.Y + 1), applelocation) < TempDistance && Snake.Gameinstance.SnakeDirection != Snake.Direction.Up && !BlockedDown)
-                {
-                    newPnt = new Point(headlocation.X, headlocation.Y + 1);
-                    TempDistance = GetDistance(newPnt, applelocation);
-                    returnValue = Snake.Direction.Down;
-                    foreach (Point bodyPnt in bodylocation)
+                    if (GetDistance(RightLoc, applelocation) < TempDistance && Snake.Gameinstance.SnakeDirection != Snake.Direction.Left && !BlockedRight)
                     {
-                        if (bodyPnt == newPnt)
+                        newPnt = new Point(headlocation.X + 1, headlocation.Y);
+                        TempDistance = GetDistance(newPnt, applelocation);
+                        returnValue = Snake.Direction.Right;
+                        foreach (Point bodyPnt in bodylocation)
                         {
-                            BlockedDown = true;
-                            goto redo;
+                            if (bodyPnt == newPnt)
+                            {
+                                BlockedRight = true;
+                                goto redo;
+                            }
                         }
                     }
-                }
-                if (GetDistance(new Point(headlocation.X - 1, headlocation.Y), applelocation) < TempDistance && Snake.Gameinstance.SnakeDirection != Snake.Direction.Right && !BlockedLeft)
-                {
-                    newPnt = new Point(headlocation.X - 1, headlocation.Y);
-                    TempDistance = GetDistance(newPnt, applelocation);
-                    returnValue = Snake.Direction.Left;
-                    foreach (Point bodyPnt in bodylocation)
-                    {
-                        if (bodyPnt == newPnt)
-                        {
-                            BlockedLeft = true;
-                            goto redo;
-                        }
-                    }
-                }
-                if (GetDistance(new Point(headlocation.X + 1, headlocation.Y), applelocation) < TempDistance && Snake.Gameinstance.SnakeDirection != Snake.Direction.Left && !BlockedRight)
-                {
-                    newPnt = new Point(headlocation.X + 1, headlocation.Y);
-                    TempDistance = GetDistance(newPnt, applelocation);
-                    returnValue = Snake.Direction.Right;
-                    foreach (Point bodyPnt in bodylocation)
-                    {
-                        if (bodyPnt == newPnt)
-                        {
-                            BlockedRight = true;
-                            goto redo;
-                        }
-                    }
-                }
 
-                // fail safe check
-                if (returnValue == Snake.Direction.Up && IsBody(UpLoc))
-                {
-                    BlockedUp = true;
-                    goto redo;
+                    // fail safe check
+                    if (returnValue == Snake.Direction.Up && Snake.IsBody(UpLoc) || returnValue == Snake.Direction.Up && Snake.IsWall(UpLoc))
+                    {
+                        BlockedUp = true;
+                        goto redo;
+                    }
+                    else if (returnValue == Snake.Direction.Down && Snake.IsBody(DownLoc) || returnValue == Snake.Direction.Down && Snake.IsWall(DownLoc))
+                    {
+                        BlockedDown = true;
+                        goto redo;
+                    }
+                    else if (returnValue == Snake.Direction.Left && Snake.IsBody(LeftLoc) || returnValue == Snake.Direction.Left && Snake.IsWall(LeftLoc))
+                    {
+                        BlockedLeft = true;
+                        goto redo;
+                    }
+                    else if (returnValue == Snake.Direction.Right && Snake.IsBody(RightLoc) || returnValue == Snake.Direction.Right && Snake.IsWall(RightLoc))
+                    {
+                        BlockedRight = true;
+                        goto redo;
+                    }
                 }
-                else if (returnValue == Snake.Direction.Down && IsBody(DownLoc))
+                catch (Exception ex)
                 {
-                    BlockedDown = true;
-                    goto redo;
-                }
-                else if (returnValue == Snake.Direction.Left && IsBody(LeftLoc))
-                {
-                    BlockedLeft = true;
-                    goto redo;
-                }
-                else if (returnValue == Snake.Direction.Right && IsBody(RightLoc))
-                {
-                    BlockedRight = true;
-                    goto redo;
+                    Debug.WriteLine("ERROR:\n" + ex);
+                    goto fix;
                 }
 
                 return returnValue;
@@ -281,34 +287,6 @@ namespace SnakeAI
             public static double GetDistance(Point p1, Point p2)
             {
                 return Math.Sqrt(Math.Pow((p2.X - p1.X), 2) + Math.Pow((p2.Y - p1.Y), 2));
-            }
-
-            public static bool IsWall(Point pnt)
-            {
-                if (pnt.X > Snake.Gameinstance.ScreenWidth || pnt.X < 0 || pnt.Y > Snake.Gameinstance.ScreenHeight || pnt.Y < 0)
-                    return true;
-                else
-                    return false;
-            }
-
-            public static bool IsBody(Point pnt)
-            {
-                try
-                {
-                    foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
-                    {
-                        if (bodyPnt == pnt)
-                        {
-                            return true;
-                        }
-                    }
-                }
-                catch
-                {
-                    return false;
-                }
-                
-                return false;
             }
         }
     }
