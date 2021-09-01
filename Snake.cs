@@ -55,42 +55,49 @@ namespace SnakeAI
 
         static void Main(string[] args)
         {
-            Gameinstance = new Snake();
-            Gameinstance.AIBrain = new SnakeAI.Brain(SnakeAI.IQ.Direct);
-            Gameinstance.AIEnabled = true;
-            Gameinstance.ScreenWidth = 32;
-            Gameinstance.ScreenHeight = 16;
-            Gameinstance.SnakeSpeed = 50;
-            Gameinstance.StartGame();
+            while (true)
+            {
+                Gameinstance = new Snake();
+                Gameinstance.AIBrain = new Brain(Algorithm.AStar);
+                Gameinstance.AIEnabled = true;
+                Gameinstance.ScreenWidth = 16;
+                Gameinstance.ScreenHeight = 8;
+                Gameinstance.SnakeSpeed = 250;
+                Gameinstance.StartGame();
+            }
         }
 
         public void StartGame()
         {
-            while (true)
+            Console.CursorVisible = false;
+            Console.WindowWidth = Gameinstance.ScreenWidth + 3;
+            Console.WindowHeight = Gameinstance.ScreenHeight + 1;
+            //Console.SetBufferSize(Gameinstance.ScreenWidth, Gameinstance.ScreenHeight);
+            SnakeLocationHead = GetRandomPoint();
+            SnakeDirection = GetRandomDirection();
+            SnakeLength = 3;
+            SpawnApple();
+
+            Thread moveThread = new Thread(RegisterMove);
+            moveThread.Start();
+            while (GameRunning)
             {
-                Console.CursorVisible = false;
-                Console.WindowWidth = Gameinstance.ScreenWidth + 3;
-                Console.WindowHeight = Gameinstance.ScreenHeight + 1;
-                //Console.SetBufferSize(Gameinstance.ScreenWidth, Gameinstance.ScreenHeight);
-                SnakeLocationHead = GetRandomPoint();
-                SnakeDirection = GetRandomDirection();
-                SnakeLength = 3;
-                SpawnApple();
+                if (AIEnabled)
+                    SnakeDirection = GetNextMove(AIBrain, SnakeLocationHead, DrawPoints, AppleLocation);
 
-                Thread moveThread = new Thread(RegisterMove);
-                moveThread.Start();
-                while (GameRunning)
-                {
-                    DrawBorder();
-                    RenderFrame();
-                    Thread.Sleep(Gameinstance.SnakeSpeed);
-                }
-                moveThread.Abort();
-
-                //Console.Clear();
-                //Console.WriteLine("Game Over");
-                Console.ReadLine();
+                DrawBorder();
+                RenderFrame();
+                Thread.Sleep(Gameinstance.SnakeSpeed);
             }
+            moveThread.Abort();
+
+            string gameoverstring = "Game Over";
+            string pointstring = $"{Gameinstance.SnakeLength} Points";
+            Console.SetCursorPosition((Gameinstance.ScreenWidth / 2) - (gameoverstring.Length / 2) + 1, (Gameinstance.ScreenHeight / 2) - 1);
+            Console.Write(gameoverstring);
+            Console.SetCursorPosition((Gameinstance.ScreenWidth / 2) - (pointstring.Length / 2) + 1, (Gameinstance.ScreenHeight / 2));
+            Console.Write(pointstring);
+            Console.ReadLine();
         }
 
         public void DrawString(Point pnt, string str, ConsoleColor color = ConsoleColor.White)
@@ -106,34 +113,32 @@ namespace SnakeAI
         {
             while (true)
             {
-                if (Console.KeyAvailable && KeyReset && AIEnabled)
+                if (Console.KeyAvailable && KeyReset)
                 {
-                    ConsoleKeyInfo key = Console.ReadKey(true);
-                    KeyReset = false;
-                    if (key.Key == ConsoleKey.UpArrow)
-                        Gameinstance.SnakeSpeed += 10;
-                    else if (key.Key == ConsoleKey.DownArrow && Gameinstance.SnakeSpeed != 0)
-                        Gameinstance.SnakeSpeed -= 10;
+                    if (AIEnabled)
+                    {
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+                        KeyReset = false;
+                        if (key.Key == ConsoleKey.UpArrow)
+                            Gameinstance.SnakeSpeed += 10;
+                        else if (key.Key == ConsoleKey.DownArrow && Gameinstance.SnakeSpeed != 0)
+                            Gameinstance.SnakeSpeed -= 10;
 
-                    Debug.WriteLine(Gameinstance.SnakeSpeed);
-                }
-
-                if (Console.KeyAvailable && KeyReset && !AIEnabled)
-                {
-                    ConsoleKeyInfo key = Console.ReadKey(true);
-                    KeyReset = false;
-                    if (key.Key == ConsoleKey.UpArrow && SnakeDirection != Direction.Down)
-                        SnakeDirection = Direction.Up;
-                    else if (key.Key == ConsoleKey.LeftArrow && SnakeDirection != Direction.Right)
-                        SnakeDirection = Direction.Left;
-                    else if (key.Key == ConsoleKey.DownArrow && SnakeDirection != Direction.Up)
-                        SnakeDirection = Direction.Down;
-                    else if (key.Key == ConsoleKey.RightArrow && SnakeDirection != Direction.Left)
-                        SnakeDirection = Direction.Right;
-                }
-                else if (KeyReset && AIEnabled)
-                {
-                    SnakeDirection = Pathfinding.GetNextMove(AIBrain, SnakeLocationHead, DrawPoints, AppleLocation);
+                        Debug.WriteLine(Gameinstance.SnakeSpeed);
+                    }
+                    else
+                    {
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+                        KeyReset = false;
+                        if (key.Key == ConsoleKey.UpArrow && SnakeDirection != Direction.Down)
+                            SnakeDirection = Direction.Up;
+                        else if (key.Key == ConsoleKey.LeftArrow && SnakeDirection != Direction.Right)
+                            SnakeDirection = Direction.Left;
+                        else if (key.Key == ConsoleKey.DownArrow && SnakeDirection != Direction.Up)
+                            SnakeDirection = Direction.Down;
+                        else if (key.Key == ConsoleKey.RightArrow && SnakeDirection != Direction.Left)
+                            SnakeDirection = Direction.Right;
+                    }
                 }
             }
         }
