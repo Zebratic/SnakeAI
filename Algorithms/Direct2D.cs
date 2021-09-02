@@ -1,18 +1,17 @@
-﻿using SnakeAI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static SnakeAI.SnakeAI;
+using static SnakeAI.Algorithms.Helper;
 
-namespace SnakeAI.Algorithms.Direct2D
+namespace SnakeAI.Algorithms
 {
-    public class Pathfinding
+    public class Direct2D
     {
-        public static Snake.Direction CalculateNextDirectMove(Point headlocation, List<Point> bodylocation, Point applelocation)
+        public static Snake.Direction CalculateNextMove(Point headlocation, Point applelocation)
         {
             fix:
             Snake.Direction returnValue = Snake.Gameinstance.SnakeDirection;
@@ -60,7 +59,7 @@ namespace SnakeAI.Algorithms.Direct2D
                 {
                     if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Up)
                     {
-                        foreach (Point bodyPnt in bodylocation)
+                        foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                         {
                             if (bodyPnt == RightLoc)
                             {
@@ -81,7 +80,7 @@ namespace SnakeAI.Algorithms.Direct2D
                     }
                     if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Down)
                     {
-                        foreach (Point bodyPnt in bodylocation)
+                        foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                         {
                             if (bodyPnt == LeftLoc)
                             {
@@ -102,7 +101,7 @@ namespace SnakeAI.Algorithms.Direct2D
                     }
                     if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Left)
                     {
-                        foreach (Point bodyPnt in bodylocation)
+                        foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                         {
                             if (bodyPnt == UpLoc)
                             {
@@ -123,7 +122,7 @@ namespace SnakeAI.Algorithms.Direct2D
                     }
                     if (Snake.Gameinstance.SnakeDirection == Snake.Direction.Right)
                     {
-                        foreach (Point bodyPnt in bodylocation)
+                        foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                         {
                             if (bodyPnt == DownLoc)
                             {
@@ -160,7 +159,7 @@ namespace SnakeAI.Algorithms.Direct2D
                     newPnt = new Point(headlocation.X, headlocation.Y - 1);
                     TempDistance = GetDistance(newPnt, applelocation);
                     returnValue = Snake.Direction.Up;
-                    foreach (Point bodyPnt in bodylocation)
+                    foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                     {
                         if (bodyPnt == newPnt)
                         {
@@ -174,7 +173,7 @@ namespace SnakeAI.Algorithms.Direct2D
                     newPnt = new Point(headlocation.X, headlocation.Y + 1);
                     TempDistance = GetDistance(newPnt, applelocation);
                     returnValue = Snake.Direction.Down;
-                    foreach (Point bodyPnt in bodylocation)
+                    foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                     {
                         if (bodyPnt == newPnt)
                         {
@@ -188,7 +187,7 @@ namespace SnakeAI.Algorithms.Direct2D
                     newPnt = new Point(headlocation.X - 1, headlocation.Y);
                     TempDistance = GetDistance(newPnt, applelocation);
                     returnValue = Snake.Direction.Left;
-                    foreach (Point bodyPnt in bodylocation)
+                    foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                     {
                         if (bodyPnt == newPnt)
                         {
@@ -202,7 +201,7 @@ namespace SnakeAI.Algorithms.Direct2D
                     newPnt = new Point(headlocation.X + 1, headlocation.Y);
                     TempDistance = GetDistance(newPnt, applelocation);
                     returnValue = Snake.Direction.Right;
-                    foreach (Point bodyPnt in bodylocation)
+                    foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                     {
                         if (bodyPnt == newPnt)
                         {
@@ -241,11 +240,6 @@ namespace SnakeAI.Algorithms.Direct2D
             }
 
             return returnValue;
-        }
-
-        public static double GetDistance(Point p1, Point p2)
-        {
-            return Math.Sqrt(Math.Pow((p2.X - p1.X), 2) + Math.Pow((p2.Y - p1.Y), 2));
         }
     }
 }

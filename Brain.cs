@@ -10,8 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using SnakeAI.Algorithms.AStar;
-using static SnakeAI.Algorithms.Direct2D.Pathfinding;
+using SnakeAI.Algorithms;
 
 namespace SnakeAI
 {
@@ -39,24 +38,10 @@ namespace SnakeAI
             switch (brain.IQ)
             {
                 case Algorithm.Direct2D:
-                    returnValue = CalculateNextDirectMove(headlocation, bodylocation, applelocation);
+                    returnValue = Direct2D.CalculateNextMove(headlocation, applelocation);
                     break;
                 case Algorithm.AStar:
-                    List<List<Node>> nodes = Algorithms.Helper.GetNodes(Algorithms.Helper.GetTilemap(Snake.Gameinstance.ScreenWidth, Snake.Gameinstance.ScreenHeight, Snake.Gameinstance.DrawPoints));
-                    
-                    Astar astar = new Astar(nodes);
-                    Stack<Node> path = astar.FindPath(Snake.Gameinstance.SnakeLocationHead, Snake.Gameinstance.AppleLocation);
-                    
-                    Debug.WriteLine(path.First().Center);
-                    
-                    if (path.First().Center == new Point(Snake.Gameinstance.SnakeLocationHead.X, Snake.Gameinstance.SnakeLocationHead.Y - 1))
-                        returnValue = Snake.Direction.Up;
-                    else if (path.First().Center == new Point(Snake.Gameinstance.SnakeLocationHead.X, Snake.Gameinstance.SnakeLocationHead.Y + 1))
-                        returnValue = Snake.Direction.Down;
-                    else if (path.First().Center == new Point(Snake.Gameinstance.SnakeLocationHead.X - 1, Snake.Gameinstance.SnakeLocationHead.Y))
-                        returnValue = Snake.Direction.Left;
-                    else if (path.First().Center == new Point(Snake.Gameinstance.SnakeLocationHead.X + 1, Snake.Gameinstance.SnakeLocationHead.Y))
-                        returnValue = Snake.Direction.Right;
+                    returnValue = AStar.CalculateNextMove(headlocation, applelocation, new IMap(Helper.GetTilemap(Snake.Gameinstance.ScreenWidth, Snake.Gameinstance.ScreenHeight, Snake.Gameinstance.DrawPoints)));
                     break;
                 case Algorithm.Braindead:
                     break;
@@ -64,7 +49,7 @@ namespace SnakeAI
                     break;
             }
 
-            short[,] tilemap = Algorithms.Helper.GetTilemap(Snake.Gameinstance.ScreenWidth, Snake.Gameinstance.ScreenHeight, Snake.Gameinstance.DrawPoints);
+            short[,] tilemap = Helper.GetTilemap(Snake.Gameinstance.ScreenWidth, Snake.Gameinstance.ScreenHeight, Snake.Gameinstance.DrawPoints);
             string content = "";
 
             content += "§";

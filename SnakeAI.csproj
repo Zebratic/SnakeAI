@@ -45,9 +45,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\AStar.cs" />
+    <Compile Include="Algorithms\AStarTrash.cs" />
     <Compile Include="Algorithms\Direct2D.cs" />
+    <Compile Include="Algorithms\IMap.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Brain.cs" />
+    <Compile Include="Node.cs" />
     <Compile Include="Snake.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

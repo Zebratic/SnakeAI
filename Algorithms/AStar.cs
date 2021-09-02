@@ -1,81 +1,89 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Numerics;
-using System.Drawing;
+using System.Threading.Tasks;
+using static SnakeAI.Algorithms.Helper;
 
-namespace SnakeAI.Algorithms.AStar
+
+namespace SnakeAI.Algorithms
 {
-    public class Node
+    public class AStar
     {
-        // Change this depending on what the desired size is for each element in the grid
-        public static int NODE_SIZE = 1;
-        public Node Parent;
-        public Point Position;
-        public Point Center
+        public static List<Node> Path { get; set; }
+        public static List<Node> VisitedNodes { get; set; }
+        public static Snake.Direction CalculateNextMove(Point headLocation, Point appleLocation, IMap imap)
         {
-            get
+            Snake.Direction returnValue = Snake.Gameinstance.SnakeDirection;
+            Node Start = new Node(headLocation, true);
+            Node End = new Node(appleLocation, true);
+
+            try
             {
-                return new Point(Position.X + NODE_SIZE / 2, Position.Y + NODE_SIZE / 2);
+                if (imap == null)
+                    return returnValue;
+
+                if (Path == null)
+                {   // get path
+                    Path = GetPath(imap, Start, End);
+                }
+                // get next location from path
+                List<Node> nodesLeft = Path;
+                foreach (Node rnode in VisitedNodes)
+                    nodesLeft.Remove(rnode);
+
+                Node nextNode = nodesLeft.First();
+
+                // get direction
+                if (nextNode.Location == new Point(headLocation.X, headLocation.Y - 1))
+                    returnValue = Snake.Direction.Up;
+                else if (nextNode.Location == new Point(headLocation.X, headLocation.Y + 1))
+                    returnValue = Snake.Direction.Down;
+                else if (nextNode.Location == new Point(headLocation.X - 1, headLocation.Y))
+                    returnValue = Snake.Direction.Left;
+                else if (nextNode.Location == new Point(headLocation.X + 1, headLocation.Y))
+                    returnValue = Snake.Direction.Right;
             }
-        }
-        public float DistanceToTarget;
-        public float Cost;
-        public float Weight;
-        public float F
-        {
-            get
+            catch (Exception ex)
             {
-                if (DistanceToTarget != -1 && Cost != -1)
-                    return DistanceToTarget + Cost;
-                else
-                    return -1;
+                Debug.WriteLine("ERROR:\n" + ex);
             }
-        }
-        public bool Walkable;
 
-        public Node(Point pos, bool walkable, float weight = 1)
-        {
-            Parent = null;
-            Position = pos;
-            DistanceToTarget = -1;
-            Cost = 1;
-            Weight = weight;
-            Walkable = walkable;
+            return returnValue;
         }
-    }
 
-    public class Astar
-    {
-        List<List<Node>> Grid;
-        int GridRows
+        private static List<Node> GetAdjacentNodes(IMap imap, Node node)
         {
-            get
+            List<Node> temp = new List<Node>();
+
+            int row = node.Location.X;
+            int col = node.Location.Y;
+
+            if (col + 1 < imap.Columns)
             {
-                return Grid[0].Count;
+                temp.Add(imap.Grid[row, col + 1]);
             }
-        }
-        int GridCols
-        {
-            get
+            if (col - 1 >= 0)
             {
-                return Grid.Count;
+                temp.Add(imap.Grid[row, col - 1]);
             }
+            if (row - 1 >= 0)
+            {
+                temp.Add(imap.Grid[row - 1, col]);
+            }
+            if (row + 1 < imap.Rows)
+            {
+                temp.Add(imap.Grid[row + 1, col]);
+            }
+
+            return temp;
         }
 
-        public Astar(List<List<Node>> grid)
+        public static List<Node> GetPath(IMap imap, Node start, Node end)
         {
-            Grid = grid;
-        }
-
-        public Stack<Node> FindPath(Point Start, Point End)
-        {
-            Node start = new Node(new Point((int)(Start.X / Node.NODE_SIZE), (int)(Start.Y / Node.NODE_SIZE)), true);
-            Node end = new Node(new Point((int)(End.X / Node.NODE_SIZE), (int)(End.Y / Node.NODE_SIZE)), true);
-
-            Stack<Node> Path = new Stack<Node>();
+            List<Node> Path = new List<Node>();
             List<Node> OpenList = new List<Node>();
             List<Node> ClosedList = new List<Node>();
             List<Node> adjacencies;
@@ -84,13 +92,12 @@ namespace SnakeAI.Algorithms.AStar
             // add start node to Open List
             OpenList.Add(start);
 
-            while (OpenList.Count != 0 && !ClosedList.Exists(x => x.Position == end.Position))
+            while (OpenList.Count != 0 && !ClosedList.Exists(x => x.Location == end.Location))
             {
                 current = OpenList[0];
                 OpenList.Remove(current);
                 ClosedList.Add(current);
-                adjacencies = GetAdjacentNodes(current);
-
+                adjacencies = GetAdjacentNodes(imap, current);
 
                 foreach (Node n in adjacencies)
                 {
@@ -99,7 +106,7 @@ namespace SnakeAI.Algorithms.AStar
                         if (!OpenList.Contains(n))
                         {
                             n.Parent = current;
-                            n.DistanceToTarget = Math.Abs(n.Position.X - end.Position.X) + Math.Abs(n.Position.Y - end.Position.Y);
+                            n.DistanceToTarget = Math.Abs(n.Location.X - end.Location.X) + Math.Abs(n.Location.Y - end.Location.Y);
                             n.Cost = n.Weight + n.Parent.Cost;
                             OpenList.Add(n);
                             OpenList = OpenList.OrderBy(node => node.F).ToList<Node>();
@@ -109,7 +116,7 @@ namespace SnakeAI.Algorithms.AStar
             }
 
             // construct path, if end was not closed return null
-            if (!ClosedList.Exists(x => x.Position == end.Position))
+            if (!ClosedList.Exists(x => x.Location == end.Location))
             {
                 return null;
             }
@@ -119,37 +126,10 @@ namespace SnakeAI.Algorithms.AStar
             if (temp == null) return null;
             do
             {
-                Path.Push(temp);
+                Path.Add(temp);
                 temp = temp.Parent;
             } while (temp != start && temp != null);
             return Path;
-        }
-
-        private List<Node> GetAdjacentNodes(Node n)
-        {
-            List<Node> temp = new List<Node>();
-
-            int row = (int)n.Position.Y;
-            int col = (int)n.Position.X;
-
-            if (row + 1 < GridRows)
-            {
-                temp.Add(Grid[col][row + 1]);
-            }
-            if (row - 1 >= 0)
-            {
-                temp.Add(Grid[col][row - 1]);
-            }
-            if (col - 1 >= 0)
-            {
-                temp.Add(Grid[col - 1][row]);
-            }
-            if (col + 1 < GridCols)
-            {
-                temp.Add(Grid[col + 1][row]);
-            }
-
-            return temp;
         }
     }
 }
