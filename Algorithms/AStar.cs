@@ -6,50 +6,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static SnakeAI.Algorithms.Helper;
+using Node = SnakeAI.Node;
 
 
-namespace SnakeAI.Algorithms
+namespace SnakeAI.Algorithms.ok
 {
     public class AStar
     {
-        public static List<Node> Path { get; set; }
-        public static List<Node> VisitedNodes { get; set; }
+        /*
+        public static List<Node> Path = new List<Node>();
         public static Snake.Direction CalculateNextMove(Point headLocation, Point appleLocation, IMap imap)
         {
             Snake.Direction returnValue = Snake.Gameinstance.SnakeDirection;
             Node Start = new Node(headLocation, true);
             Node End = new Node(appleLocation, true);
 
-            try
-            {
-                if (imap == null)
-                    return returnValue;
+            if (Path == null)
+                Path = GetPath(imap, Start, End);
 
-                if (Path == null)
-                {   // get path
-                    Path = GetPath(imap, Start, End);
-                }
-                // get next location from path
-                List<Node> nodesLeft = Path;
-                foreach (Node rnode in VisitedNodes)
-                    nodesLeft.Remove(rnode);
+            Node nextNode = Path[0];
 
-                Node nextNode = nodesLeft.First();
-
-                // get direction
-                if (nextNode.Location == new Point(headLocation.X, headLocation.Y - 1))
-                    returnValue = Snake.Direction.Up;
-                else if (nextNode.Location == new Point(headLocation.X, headLocation.Y + 1))
-                    returnValue = Snake.Direction.Down;
-                else if (nextNode.Location == new Point(headLocation.X - 1, headLocation.Y))
-                    returnValue = Snake.Direction.Left;
-                else if (nextNode.Location == new Point(headLocation.X + 1, headLocation.Y))
-                    returnValue = Snake.Direction.Right;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("ERROR:\n" + ex);
-            }
+            // get direction
+            if (nextNode.Location == new Point(headLocation.X, headLocation.Y - 1))
+                returnValue = Snake.Direction.Up;
+            else if (nextNode.Location == new Point(headLocation.X, headLocation.Y + 1))
+                returnValue = Snake.Direction.Down;
+            else if (nextNode.Location == new Point(headLocation.X - 1, headLocation.Y))
+                returnValue = Snake.Direction.Left;
+            else if (nextNode.Location == new Point(headLocation.X + 1, headLocation.Y))
+                returnValue = Snake.Direction.Right;
 
             return returnValue;
         }
@@ -109,6 +94,7 @@ namespace SnakeAI.Algorithms
                             n.DistanceToTarget = Math.Abs(n.Location.X - end.Location.X) + Math.Abs(n.Location.Y - end.Location.Y);
                             n.Cost = n.Weight + n.Parent.Cost;
                             OpenList.Add(n);
+                            Debug.WriteLine("bruh");
                             OpenList = OpenList.OrderBy(node => node.F).ToList<Node>();
                         }
                     }
@@ -123,13 +109,14 @@ namespace SnakeAI.Algorithms
 
             // if all good, return path
             Node temp = ClosedList[ClosedList.IndexOf(current)];
-            if (temp == null) return null;
-            do
+            if (temp != null)
             {
                 Path.Add(temp);
                 temp = temp.Parent;
-            } while (temp != start && temp != null);
+            }
+            //while (temp != start && temp != null);
             return Path;
         }
+        */
     }
 }

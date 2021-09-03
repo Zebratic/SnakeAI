@@ -41,7 +41,7 @@ namespace SnakeAI
                     returnValue = Direct2D.CalculateNextMove(headlocation, applelocation);
                     break;
                 case Algorithm.AStar:
-                    returnValue = AStar.CalculateNextMove(headlocation, applelocation, new IMap(Helper.GetTilemap(Snake.Gameinstance.ScreenWidth, Snake.Gameinstance.ScreenHeight, Snake.Gameinstance.DrawPoints)));
+                    returnValue = TestAStar.CalculateNextMove(headlocation, applelocation, new IMap(Helper.GetTilemap(Snake.Gameinstance.ScreenWidth, Snake.Gameinstance.ScreenHeight, Snake.Gameinstance.DrawPoints)));
                     break;
                 case Algorithm.Braindead:
                     break;
@@ -75,7 +75,7 @@ namespace SnakeAI
 
             content += "§\n\n";
 
-            Debug.WriteLine(content);
+            //Debug.WriteLine(content);
 
             return returnValue;
         }

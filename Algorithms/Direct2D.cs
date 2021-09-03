@@ -161,7 +161,7 @@ namespace SnakeAI.Algorithms
                     returnValue = Snake.Direction.Up;
                     foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                     {
-                        if (bodyPnt == newPnt)
+                        if (bodyPnt == newPnt || Snake.GetNextAvailable(newPnt) < 1)
                         {
                             BlockedUp = true;
                             goto redo;
@@ -175,7 +175,7 @@ namespace SnakeAI.Algorithms
                     returnValue = Snake.Direction.Down;
                     foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                     {
-                        if (bodyPnt == newPnt)
+                        if (bodyPnt == newPnt || Snake.GetNextAvailable(newPnt) < 1)
                         {
                             BlockedDown = true;
                             goto redo;
@@ -189,7 +189,7 @@ namespace SnakeAI.Algorithms
                     returnValue = Snake.Direction.Left;
                     foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                     {
-                        if (bodyPnt == newPnt)
+                        if (bodyPnt == newPnt || Snake.GetNextAvailable(newPnt) < 1)
                         {
                             BlockedLeft = true;
                             goto redo;
@@ -203,7 +203,7 @@ namespace SnakeAI.Algorithms
                     returnValue = Snake.Direction.Right;
                     foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
                     {
-                        if (bodyPnt == newPnt)
+                        if (bodyPnt == newPnt || Snake.GetNextAvailable(newPnt) < 1)
                         {
                             BlockedRight = true;
                             goto redo;

@@ -9,34 +9,25 @@ namespace SnakeAI
 {
     public class Node
     {
-        public Node Parent;
-        public Point Location { get; set; }
-        public Point Center
-        {
-            get
-            {
-                return new Point(Location.X / 2, Location.Y / 2);
-            }
-        }
-        public float DistanceToTarget;
-        public float Cost;
-        public float Weight;
-        public float F
-        {
-            get
-            {
-                if (DistanceToTarget != -1 && Cost != -1)
-                    return DistanceToTarget + Cost;
-                else
-                    return -1;
-            }
-        }
-        public bool Walkable { get; set; }
+        public bool Walkable{ get; set; }
+        public Point Position { get; set; }
+        public int Cost { get; set; }
+        public int Distance { get; set; }
+        public int CostDistance => Cost + Distance;
+        public Node Parent { get; set; }
 
-        public Node(Point location, bool walkable)
+        public Node(Point position, Node parent = null, int cost = 1)
         {
-            Location = location;
-            Walkable = walkable;
+            Position = position;
+            Parent = parent;
+            Cost = cost;
+        }
+
+        public bool IsWalkable() => Walkable;
+
+        public void SetDistance(Point target)
+        {
+            this.Distance = Math.Abs(target.X - this.Position.X) + Math.Abs(target.Y - this.Position.Y);
         }
     }
 }

@@ -58,11 +58,11 @@ namespace SnakeAI
             while (true)
             {
                 Gameinstance = new Snake();
-                Gameinstance.AIBrain = new Brain(Algorithm.AStar);
+                Gameinstance.AIBrain = new Brain(Algorithm.Direct2D);
                 Gameinstance.AIEnabled = true;
-                Gameinstance.ScreenWidth = 16;
-                Gameinstance.ScreenHeight = 8;
-                Gameinstance.SnakeSpeed = 250;
+                Gameinstance.ScreenWidth = 32;
+                Gameinstance.ScreenHeight = 16;
+                Gameinstance.SnakeSpeed = 150;
                 Gameinstance.StartGame();
             }
         }
@@ -97,6 +97,7 @@ namespace SnakeAI
             Console.Write(gameoverstring);
             Console.SetCursorPosition((Gameinstance.ScreenWidth / 2) - (pointstring.Length / 2) + 1, (Gameinstance.ScreenHeight / 2));
             Console.Write(pointstring);
+            Debug.WriteLine(Gameinstance.SnakeLocationHead);
             Console.ReadLine();
         }
 
@@ -218,7 +219,7 @@ namespace SnakeAI
         {
             try
             {
-                foreach (Point bodyPnt in Snake.Gameinstance.DrawPoints)
+                foreach (Point bodyPnt in Gameinstance.DrawPoints)
                 {
                     if (bodyPnt == pnt)
                     {
@@ -232,6 +233,30 @@ namespace SnakeAI
             }
 
             return false;
+        }
+
+        public static int GetNextAvailable(Point pnt)
+        {
+            int availablePositions = 0;
+            try
+            {
+                Point UpLoc = new Point(pnt.X, pnt.Y - 1);
+                Point DownLoc = new Point(pnt.X, pnt.Y + 1);
+                Point LeftLoc = new Point(pnt.X - 1, pnt.Y);
+                Point RightLoc = new Point(pnt.X + 1, pnt.Y);
+
+                if (!IsBody(UpLoc) && !IsWall(UpLoc))
+                    availablePositions++;
+                if (!IsBody(DownLoc) && !IsWall(DownLoc))
+                    availablePositions++;
+                if (!IsBody(LeftLoc) && !IsWall(LeftLoc))
+                    availablePositions++;
+                if (!IsBody(RightLoc) && !IsWall(RightLoc))
+                    availablePositions++;
+            }
+            catch { }
+
+            return availablePositions;
         }
 
         public void DrawBorder()

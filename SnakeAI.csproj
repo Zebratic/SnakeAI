@@ -48,6 +48,7 @@
     <Compile Include="Algorithms\AStarTrash.cs" />
     <Compile Include="Algorithms\Direct2D.cs" />
     <Compile Include="Algorithms\IMap.cs" />
+    <Compile Include="Algorithms\TestAStar.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Brain.cs" />
     <Compile Include="Node.cs" />

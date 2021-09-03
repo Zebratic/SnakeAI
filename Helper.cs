@@ -24,28 +24,6 @@ namespace SnakeAI.Algorithms
             return tilemap;
         }
 
-        public static List<List<Node>> GetNodes(short[,] tilemap)
-        {
-            List<List<Node>> nodes = new List<List<Node>>();
-
-            for (int x = 0; x < tilemap.GetLength(0); x++)
-            {
-                for (int y = 0; y < tilemap.GetLength(1); y++)
-                {
-                    bool walkable = true;
-                    if (tilemap[x, y] == 1)
-                        walkable = false;
-
-                    Node node = new Node(new Point(x, y), walkable);
-                    List<Node> nodelist = new List<Node>();
-                    nodelist.Add(node);
-                    nodes.Add(nodelist);
-                }
-            }
-
-            return nodes;
-        }
-
         public static double GetDistance(Point p1, Point p2)
         {
             return Math.Sqrt(Math.Pow((p2.X - p1.X), 2) + Math.Pow((p2.Y - p1.Y), 2));
